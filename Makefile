@@ -17,7 +17,7 @@ rs-initiate:
 
 create-root-user:
 	mongo --port 27017 --eval \
-		'db.createUser({user: "root", pwd: "rootpwd", roles: ["root"]})'
+		'db.createUser({user: "root", pwd: "rootpwd", roles: ["root"]})' admin
 
 rs-add-members:
 	mongo --port 27017 -u root -p rootpwd --eval 'rs.add("localhost:27117")' admin
