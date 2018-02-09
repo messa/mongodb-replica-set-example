@@ -3,30 +3,37 @@ default:
 	make ssl/server-a.key-cert
 	make ssl/server-b.key-cert
 
-run-mongod-a:
-	mkdir -p a/data
+run-mongod-a: ssl/server-a.key-cert
+	mkdir -p data-a
 	mongod --config mongod.a.conf
 
-run-mongod-b:
-	mkdir -p b/data
+run-mongod-b: ssl/server-b.key-cert
+	mkdir -p data-b
 	mongod --config mongod.b.conf
 
 rs-initiate:
-	mongo --port 27017 --eval \
-		'rs.initiate({_id: "examplers", version: 1, members: [{_id: 0, host: "localhost:27017"}]})'
+	mongo --host localhost --port 27017 --ssl --sslCAFile ssl/ca.cert \
+		--eval 'rs.initiate({_id: "examplers", version: 1, members: [{_id: 0, host: "localhost:27017"}]})'
 
 create-root-user:
-	mongo --port 27017 --eval \
-		'db.createUser({user: "root", pwd: "rootpwd", roles: ["root"]})' admin
+	mongo --host localhost --port 27017 --ssl --sslCAFile ssl/ca.cert \
+		--eval 'db.createUser({user: "root", pwd: "rootpwd", roles: ["root"]})' admin
+
+create-backup-user:
+	mongo --host localhost --port 27017 --ssl --sslCAFile ssl/ca.cert -u root -p rootpwd \
+		--eval 'db.createUser({user: "backup", pwd: "backuppwd", roles: ["backup"]})' admin
 
 rs-add-members:
-	mongo --port 27017 -u root -p rootpwd --eval 'rs.add("localhost:27117")' admin
+	mongo --host localhost --port 27017 --ssl --sslCAFile ssl/ca.cert -u root -p rootpwd \
+		--eval 'rs.add("localhost:27117")' admin
+
+rs-status-noauth:
+	mongo --host localhost --port 27017 --ssl --sslCAFile ssl/ca.cert \
+		--eval 'rs.status()' admin
 
 rs-status:
-	mongo --port 27017 -u root -p rootpwd --eval 'rs.status()' admin
-	@echo
-	@echo
-	mongo --port 27117 -u root -p rootpwd --eval 'rs.status()' admin
+	mongo --host localhost --port 27017 --ssl --sslCAFile ssl/ca.cert -u root -p rootpwd \
+		--eval 'rs.status()' admin
 
 ssl/server-%.key.password:
 	echo top-secret > $@
@@ -39,7 +46,7 @@ ssl/%.key: ssl/%.key.password
 
 .PRECIOUS: ssl/%.key.password ssl/%.key
 
-ssl/ca.cert: ssl/ca.key
+ssl/ca.cert: ssl/ca.key ssl/ca.key.password
 	openssl req -config ssl/openssl.conf -new -x509 -days 10000 \
 		-key ssl/ca.key -passin file:ssl/ca.key.password \
 		-out $@ -extensions v3_ca -subj "/O=ACME/CN=Sample CA"
