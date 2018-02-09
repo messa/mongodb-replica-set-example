@@ -35,6 +35,13 @@ rs-status:
 	mongo --host localhost --port 27017 --ssl --sslCAFile ssl/ca.cert -u root -p rootpwd \
 		--eval 'rs.status()' admin
 
+shell:
+	mongo --host localhost --port 27017 --ssl --sslCAFile ssl/ca.cert -u root -p rootpwd admin
+
+insert-sample-data:
+	mongo --host localhost --port 27017 --ssl --sslCAFile ssl/ca.cert -u root -p rootpwd --authenticationDatabase admin \
+		--eval 'new Array(100).fill().map((i, n) => db.items.insert({ n }))' sample
+
 ssl/server-%.key.password:
 	echo top-secret > $@
 
