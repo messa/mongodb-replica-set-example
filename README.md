@@ -21,7 +21,7 @@ $ make run-mongod-b  &
 $ 
 $ make rs-initiate 
 mongo --port 27017 --eval \
-        'rs.initiate({_id: "examplers", version: 1, members: [{_id: 0, host: "localhost:27017"}]})'
+        'rs.initiate({_id: "testrs", version: 1, members: [{_id: 0, host: "localhost:27017"}]})'
 MongoDB shell version v3.4.5
 connecting to: mongodb://127.0.0.1:27017/
 2017-06-18T13:00:08.624+0200 I NETWORK  [thread1] connection accepted from 127.0.0.1:45948 #1 (1 connection now open)

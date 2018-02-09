@@ -13,7 +13,7 @@ run-mongod-b: ssl/server-b.key-cert
 
 rs-initiate:
 	mongo --host localhost --port 27017 --ssl --sslCAFile ssl/ca.cert \
-		--eval 'rs.initiate({_id: "examplers", version: 1, members: [{_id: 0, host: "localhost:27017"}]})'
+		--eval 'rs.initiate({_id: "testrs", version: 1, members: [{_id: 0, host: "localhost:27017"}]})'
 
 create-root-user:
 	mongo --host localhost --port 27017 --ssl --sslCAFile ssl/ca.cert \
